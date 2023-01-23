@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className='min-h-screen bg-light text-dark dark:bg-dark dark:text-light'>
+    <div className='min-h-screen bg-light font-primary text-dark dark:bg-dark dark:text-light'>
       <SwitchTheme className='absolute bottom-5 right-5' />
       {children}
     </div>

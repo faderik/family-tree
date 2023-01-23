@@ -7,37 +7,46 @@ import { useState } from 'react';
 
 import { TResponseFormat } from '@/lib/ResponseFormat';
 
-import FormLogin from '@/components/FormLogin';
+import FormRegister from '@/components/FormRegister';
 import Layout from '@/components/layout/Layout';
 import Seo from '@/components/Seo';
 
 import { getAbsoluteUrl, getAppCookies, verifyToken } from '@/middleware/utils';
 
-type LoginPageProps = {
+type RegisterPageProps = {
   baseApiUrl: string;
   profile?: { [key: string]: string };
 };
 
-type TFormLogin = {
+type TFormRegister = {
   [key: string]: {
     value: string;
   };
 };
 
-const FORM_DATA_LOGIN = {
+const FORM_DATA_REGISTER = {
   email: {
+    value: '',
+  },
+  username: {
+    value: '',
+  },
+  name: {
     value: '',
   },
   password: {
     value: '',
   },
+  confirmPassword: {
+    value: '',
+  },
 };
 
-export default function LoginPage(props: LoginPageProps) {
+export default function RegisterPage(props: RegisterPageProps) {
   const { baseApiUrl } = props;
   const [loading, setLoading] = useState(false);
   const [stateFormData, setStateFormData] =
-    useState<TFormLogin>(FORM_DATA_LOGIN);
+    useState<TFormRegister>(FORM_DATA_REGISTER);
   const [stateFormMessage, setStateFormMessage] = useState<TResponseFormat>();
   const [stateFormError, setStateFormError] = useState({});
 
@@ -65,11 +74,14 @@ export default function LoginPage(props: LoginPageProps) {
     const reqBody = {
       email: stateFormData.email.value ?? '',
       password: stateFormData.password.value ?? '',
+      confirmPassword: stateFormData.confirmPassword.value ?? '',
+      username: stateFormData.username.value ?? '',
+      name: stateFormData.name.value ?? '',
     };
 
     if (isValid) {
       setLoading(!loading);
-      const loginApi = await fetch(`${baseApiUrl}/auth/login`, {
+      const loginApi = await fetch(`${baseApiUrl}/auth/register`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -82,7 +94,7 @@ export default function LoginPage(props: LoginPageProps) {
       });
 
       const result: TResponseFormat = await loginApi?.json();
-      if (result.metadata.status == 200) {
+      if (result.metadata.status == 201) {
         Cookies.set('token', result.data.token);
         Router.push('/');
       } else {
@@ -94,12 +106,12 @@ export default function LoginPage(props: LoginPageProps) {
 
   return (
     <Layout>
-      <Seo title='Login Family Tree' />
+      <Seo title='Register Family Tree' />
 
       <main className=''>
         <section className='content'>
           <div className='flex min-h-screen flex-col items-center justify-center'>
-            <FormLogin
+            <FormRegister
               onSubmitHandler={onSubmitHandler}
               onChangeHandler={onChangeHandler}
               stateFormData={stateFormData}
@@ -120,7 +132,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const baseApiUrl = `${origin}/api`;
 
   const { token } = getAppCookies(context.req);
-  const profile = token ? await verifyToken(token.split(' ')[1]) : null;
+  const profile = token ? verifyToken(token.split(' ')[1]) : '';
 
   if (profile) {
     return {

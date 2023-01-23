@@ -13,6 +13,7 @@ export async function verifyToken(jwtToken: string) {
   try {
     return jwt.verify(jwtToken, SECRET_KEY);
   } catch (e) {
+    console.log(e);
     return null;
   }
 }

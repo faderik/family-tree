@@ -1,9 +1,13 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import connectMongo from '@/lib/db/ConnectMongo';
 import { TUser, User } from '@/lib/db/model/User';
 import { ResponseFormat } from '@/lib/ResponseFormat';
+
+const EXPIRES_SEC = 31556926; // 1 year in seconds
+const SECRET_KEY = process.env.JWT_KEY ?? 'FAMILYTREE';
 
 connectMongo();
 
@@ -30,7 +34,7 @@ export default async function register(
 
         /* Check user email/_id in database */
         user = await User.findOne({
-          $or: [{ email: email }, { _id: email }],
+          $or: [{ email: email }, { _id: username }],
         });
 
         if (user)
@@ -45,11 +49,24 @@ export default async function register(
           createdAt: new Date(),
         });
 
-        if (user)
-          return new ResponseFormat(res, 201, 'Registration success', {
-            user: user,
+        if (user) {
+          const payload = {
+            username: user?._id,
+            email: user?.email,
+            name: user?.name,
+            createdAt: user?.createdAt,
+            personId: user?.personId,
+          };
+
+          /* Sign token */
+          const token = jwt.sign(payload, SECRET_KEY, {
+            expiresIn: EXPIRES_SEC,
           });
-        else return new ResponseFormat(res, 500, 'User not crated');
+
+          return new ResponseFormat(res, 201, 'Registration success', {
+            token: token,
+          });
+        } else return new ResponseFormat(res, 500, 'User not created');
 
       default:
         return new ResponseFormat(res, 405, 'Method Not Allowed');

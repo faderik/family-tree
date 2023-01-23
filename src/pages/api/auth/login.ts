@@ -34,33 +34,27 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
         /* Variables checking */
         if (user) {
           /* Check and compare password */
-          bcrypt.compare(password, user.password).then((isMatch) => {
-            if (isMatch) {
-              /* Create JWT Payload */
-              const payload = {
-                username: user?._id,
-                email: user?.email,
-                name: user?.name,
-                createdAt: user?.createdAt,
-                personId: user?.personId,
-              };
+          const isMatch = await bcrypt.compare(password, user.password);
+          if (isMatch) {
+            /* Create JWT Payload */
+            const payload = {
+              username: user?._id,
+              email: user?.email,
+              name: user?.name,
+              createdAt: user?.createdAt,
+              personId: user?.personId,
+            };
 
-              /* Sign token */
-              jwt.sign(
-                payload,
-                SECRET_KEY,
-                {
-                  expiresIn: EXPIRES_SEC,
-                },
-                (err, token) => {
-                  /* Send succes with token */
-                  return new ResponseFormat(res, 200, 'Login success', {
-                    token: `Bearer ${token}`,
-                  });
-                }
-              );
-            } else return new ResponseFormat(res, 400, 'Password incorrect');
-          });
+            /* Sign token */
+            const token = jwt.sign(payload, SECRET_KEY, {
+              expiresIn: EXPIRES_SEC,
+            });
+
+            if (token)
+              return new ResponseFormat(res, 200, 'Login success', {
+                token: `Bearer ${token}`,
+              });
+          } else return new ResponseFormat(res, 400, 'Password incorrect');
         } else
           return new ResponseFormat(
             res,

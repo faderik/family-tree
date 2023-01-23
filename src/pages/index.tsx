@@ -52,7 +52,7 @@ export default function IndexPage(props: IndexPageProps) {
                 <div className='flex gap-2'>
                   <a
                     href='#'
-                    className='flex items-center font-bold text-emerald-800 dark:text-emerald-200'
+                    className='flex items-center font-bold text-emerald-600'
                     onClick={(e) => handleOnClickLogout(e)}
                   >
                     <RiLogoutCircleLine className='mr-2' />
@@ -85,7 +85,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const baseApiUrl = `${origin}/api`;
 
   const { token } = getAppCookies(context.req);
-  console.log('TOKEN: ', token);
   const profile = token ? await verifyToken(token.split(' ')[1]) : null;
 
   return {

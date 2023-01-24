@@ -1,15 +1,19 @@
-import { Model, model, models, Schema } from "mongoose";
+import { Model, model, models, Schema } from 'mongoose';
 
-const familySchema = new Schema({
-  _id: String,
-  password : String,
-  name: String,
-}, { collection: 'families' })
+const familySchema = new Schema(
+  {
+    _id: String,
+    name: String,
+    userId: String,
+  },
+  { collection: 'families' }
+);
 
 type TFamily = {
-  _id: string,
-  password: string,
-  name: string,
+  _id: string;
+  userId: string;
+  name: string;
 };
 
-export const Family = models.Family as Model<TFamily> || model('Family', familySchema);
+export const Family =
+  (models.Family as Model<TFamily>) || model('Family', familySchema);

@@ -61,7 +61,7 @@ export default function IndexPage(props: IndexPageProps) {
                     </p>
                   </a>
                   |
-                  <UnderlineLink href='/about' className='font-normal'>
+                  <UnderlineLink href='/families' className='font-normal'>
                     Continue as{' '}
                     <p className='ml-1 font-bold text-emerald-600'>
                       {' '}

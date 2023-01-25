@@ -9,7 +9,7 @@ const familySchema = new Schema(
   { collection: 'families' }
 );
 
-type TFamily = {
+export type TFamily = {
   _id: string;
   userId: string;
   name: string;

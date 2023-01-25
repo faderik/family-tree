@@ -24,7 +24,7 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
       if (!checkUser) return new ResponseFormat(res, 401, 'User not found');
 
       const families = await Family.find({
-        userId: decoded?._id,
+        userId: decoded?.username,
       });
 
       if (families)

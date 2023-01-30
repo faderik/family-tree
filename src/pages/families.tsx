@@ -6,6 +6,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { TFamily } from '@/lib/db/model/Family';
 
 import FamilyBox from '@/components/FamilyBox';
+import FamilyBoxAdd from '@/components/FamilyBoxAdd';
 import Layout from '@/components/layout/Layout';
 import Seo from '@/components/Seo';
 
@@ -49,17 +50,35 @@ export default function FamiliesPage(props: FamiliesPageProps) {
 
       <main className=''>
         <section className='content'>
-          <div className='flex min-h-screen p-8'>
-            {loading ? (
-              <div className='loading mx-auto flex items-center justify-center gap-2 text-sm'>
-                <AiOutlineLoading3Quarters size={30} className='animate-spin' />
-                Loading
-              </div>
-            ) : (
-              families.map((family: TFamily) => (
-                <FamilyBox key={family._id} family={family} />
-              ))
-            )}
+          <div className='mx-auto flex min-h-screen w-8/12 flex-col items-center justify-center'>
+            <div className='title mt-8 mb-12 w-full items-center text-center'>
+              <h1 className='text-3xl font-bold'>Family List</h1>
+              <p className='mt-2'>
+                All listed families that you already registered in your account
+              </p>
+            </div>
+            <div className='flex w-full items-center'>
+              {loading ? (
+                <div className='loading mx-auto flex items-center justify-center gap-2 text-sm'>
+                  <AiOutlineLoading3Quarters
+                    size={30}
+                    className='animate-spin'
+                  />
+                  Loading
+                </div>
+              ) : (
+                <div className='mx-auto flex flex-wrap items-center gap-4'>
+                  <FamilyBoxAdd />
+                  {families.map((family: TFamily) => (
+                    <FamilyBox
+                      key={family._id}
+                      family={family}
+                      isPublic={Math.random() > 0.5}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </main>

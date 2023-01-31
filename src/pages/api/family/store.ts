@@ -10,6 +10,10 @@ connectMongo();
 
 export default async function store(req: NextApiRequest, res: NextApiResponse) {
   const { authorization } = req.headers;
+  const { fam_id, fam_name } = req.body;
+
+  if (!fam_id) return new ResponseFormat(res, 422, 'Family ID is required');
+  if (!fam_name) return new ResponseFormat(res, 422, 'Family name is required');
 
   try {
     if (req.method == 'POST') {
@@ -18,14 +22,13 @@ export default async function store(req: NextApiRequest, res: NextApiResponse) {
 
       if (!user) return new ResponseFormat(res, 401, 'User not found');
 
-      const famId = req.body.fam_id;
-      const checkFam = await Family.findById(famId);
+      const checkFam = await Family.findById(fam_id);
       if (checkFam)
         return new ResponseFormat(res, 400, 'Family ID already taken');
 
       const doc = new Family();
-      doc._id = famId;
-      doc.name = req.body.fam_name;
+      doc._id = fam_id;
+      doc.name = fam_name;
       doc.userId = user?._id;
 
       doc.save((err, doc) => {
@@ -34,7 +37,7 @@ export default async function store(req: NextApiRequest, res: NextApiResponse) {
             error: err.message,
           });
         else
-          return new ResponseFormat(res, 200, 'Family successfully added', {
+          return new ResponseFormat(res, 201, 'Family successfully added', {
             family: doc,
           });
       });

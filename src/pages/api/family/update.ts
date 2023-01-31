@@ -10,6 +10,10 @@ connectMongo();
 
 export default async function store(req: NextApiRequest, res: NextApiResponse) {
   const { authorization } = req.headers;
+  const { fam_id, fam_name } = req.body;
+
+  if (!fam_id) return new ResponseFormat(res, 422, 'Family ID is required');
+  if (!fam_name) return new ResponseFormat(res, 422, 'Family name is required');
 
   try {
     if (req.method == 'POST') {
@@ -18,12 +22,11 @@ export default async function store(req: NextApiRequest, res: NextApiResponse) {
 
       if (!user) return new ResponseFormat(res, 401, 'User not found');
 
-      const famId = req.body.fam_id;
-      if (!famId) return new ResponseFormat(res, 422, 'Family ID is required');
+      if (!fam_id) return new ResponseFormat(res, 422, 'Family ID is required');
 
-      const doc = await Family.findById(famId);
+      const doc = await Family.findById(fam_id);
       if (doc) {
-        doc.name = req.body.fam_name;
+        doc.name = fam_name;
 
         doc.save((err, doc) => {
           if (err)

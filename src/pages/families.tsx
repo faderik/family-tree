@@ -5,6 +5,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 import { TFamily } from '@/lib/db/model/Family';
 
+import FamilyAddModal from '@/components/FamilyAddModal';
 import FamilyBox from '@/components/FamilyBox';
 import FamilyBoxAdd from '@/components/FamilyBoxAdd';
 import Layout from '@/components/layout/Layout';
@@ -17,32 +18,47 @@ type FamiliesPageProps = {
   profile?: { [key: string]: string };
 };
 
-async function getFamilies(baseApiUrl: string) {
-  const token = Cookies.get('token') ?? '';
-  const reqHeaders: HeadersInit = new Headers();
-  reqHeaders.set('Content-Type', 'application/json');
-  reqHeaders.set('Authorization', token);
-
-  const res = await fetch(`${baseApiUrl}/family`, {
-    method: 'GET',
-    headers: reqHeaders,
-  });
-  const data = await res.json();
-
-  return data.data.families;
-}
-
 export default function FamiliesPage(props: FamiliesPageProps) {
   const [families, setFamilies] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
-    setLoading(true);
-    getFamilies(props.baseApiUrl).then((families) => {
-      setFamilies(families);
-      setLoading(false);
-    });
+    getFamilies(props.baseApiUrl);
   }, [props]);
+
+  async function getFamilies(baseApiUrl: string) {
+    setLoading(true);
+
+    const token = Cookies.get('token') ?? '';
+    const reqHeaders: HeadersInit = new Headers();
+    reqHeaders.set('Content-Type', 'application/json');
+    reqHeaders.set('Authorization', token);
+
+    const res = await fetch(`${baseApiUrl}/family`, {
+      method: 'GET',
+      headers: reqHeaders,
+    });
+    const data = await res.json();
+    setFamilies(data.data.families);
+    setLoading(false);
+
+    return;
+  }
+
+  function toggleModal(show?: boolean) {
+    if (show === false) {
+      document.getElementById('familyAddModal')?.classList.add('hidden');
+      document.getElementById('familyAddModal')?.classList.remove('flex');
+      return;
+    } else if (show === true) {
+      document.getElementById('familyAddModal')?.classList.remove('hidden');
+      document.getElementById('familyAddModal')?.classList.add('flex');
+      return;
+    }
+
+    document.getElementById('familyAddModal')?.classList.toggle('hidden');
+    document.getElementById('familyAddModal')?.classList.toggle('flex');
+  }
 
   return (
     <Layout>
@@ -68,7 +84,11 @@ export default function FamiliesPage(props: FamiliesPageProps) {
                 </div>
               ) : (
                 <div className='mx-auto flex flex-wrap items-center gap-4'>
-                  <FamilyBoxAdd />
+                  <FamilyBoxAdd
+                    onClick={() => {
+                      toggleModal();
+                    }}
+                  />
                   {families.map((family: TFamily) => (
                     <FamilyBox
                       key={family._id}
@@ -79,6 +99,13 @@ export default function FamiliesPage(props: FamiliesPageProps) {
                 </div>
               )}
             </div>
+
+            {/* Modal */}
+            <FamilyAddModal
+              toggleModal={toggleModal}
+              baseApiUrl={props.baseApiUrl}
+              syncFamily={getFamilies}
+            />
           </div>
         </section>
       </main>

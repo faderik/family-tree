@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import Cookies from 'js-cookie';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,8 +7,10 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BsArrowLeftCircleFill } from 'react-icons/bs';
 
 import { TFamily } from '@/lib/db/model/Family';
+import { TMember } from '@/lib/db/model/Member';
 
 import Layout from '@/components/layout/Layout';
+import MemberAddModal from '@/components/MemberAddModal';
 import Seo from '@/components/Seo';
 
 import { getAbsoluteUrl, getAppCookies, verifyToken } from '@/middleware/utils';
@@ -23,29 +24,45 @@ export default function FamilyPage(props: FamilyPageProps) {
   const router = useRouter();
   const { famid } = router.query;
   const [family, setFamily] = React.useState<TFamily>();
+  const [members, setMembers] = React.useState<[TMember]>([{}] as [TMember]);
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
-    getFamily(props.baseApiUrl);
+    getMembers(props.baseApiUrl);
   }, []);
 
-  async function getFamily(baseApiUrl: string) {
+  async function getMembers(baseApiUrl: string) {
     setLoading(true);
 
-    const token = Cookies.get('token') ?? '';
     const reqHeaders: HeadersInit = new Headers();
     reqHeaders.set('Content-Type', 'application/json');
-    reqHeaders.set('Authorization', token);
 
     const res = await fetch(`${baseApiUrl}/family/${famid}`, {
       method: 'GET',
       headers: reqHeaders,
     });
+
     const data = await res.json();
     setFamily(data.data.family);
+    setMembers(data.data.members);
     setLoading(false);
 
     return;
+  }
+
+  function toggleModal(show?: boolean) {
+    if (show === false) {
+      document.getElementById('memberAddModal')?.classList.add('hidden');
+      document.getElementById('memberAddModal')?.classList.remove('flex');
+      return;
+    } else if (show === true) {
+      document.getElementById('memberAddModal')?.classList.remove('hidden');
+      document.getElementById('memberAddModal')?.classList.add('flex');
+      return;
+    }
+
+    document.getElementById('memberAddModal')?.classList.toggle('hidden');
+    document.getElementById('memberAddModal')?.classList.toggle('flex');
   }
 
   return (
@@ -72,7 +89,34 @@ export default function FamilyPage(props: FamilyPageProps) {
                   Loading
                 </div>
               ) : (
-                <div className='mx-auto flex flex-wrap items-center gap-4'></div>
+                <div className='mx-auto flex flex-col items-center gap-4'>
+                  <button
+                    className='mb-8 rounded-md bg-emerald-800 px-4 py-2 font-bold text-white hover:bg-emerald-700'
+                    onClick={() => toggleModal()}
+                  >
+                    Add Member
+                  </button>
+
+                  {/* List Member */}
+                  <p className='oldest'>{'Oldest : ' + family?.oldestId}</p>
+                  <div className='flex flex-col items-center gap-4'>
+                    {members.map((member) => (
+                      <div
+                        key={member._id}
+                        className='flex flex-col items-center gap-2'
+                      >
+                        {member.name}
+                      </div>
+                    ))}
+                  </div>
+
+                  <MemberAddModal
+                    baseApiUrl={props.baseApiUrl}
+                    toggleModal={toggleModal}
+                    syncMember={getMembers}
+                    familyId={famid as string}
+                  />
+                </div>
               )}
             </div>
           </div>

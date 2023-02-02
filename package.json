@@ -21,6 +21,7 @@
     "tailwind-merge": "^1.8.1"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
     "@types/bcryptjs": "^2.4.2",
     "@types/js-cookie": "^3.0.2",
     "@types/jsonwebtoken": "^9.0.1",

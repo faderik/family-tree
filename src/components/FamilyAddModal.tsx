@@ -70,27 +70,26 @@ export default function FamilyAddModal(props: FamilyAddModalProps) {
       id='familyAddModal'
       tabIndex={-1}
       aria-hidden='true'
-      className='modal fixed inset-0 z-50 hidden h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-100/20 p-4'
+      className='modal fixed inset-0 z-50 hidden h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-dark/80 p-4'
     >
       {/* This is for setting the width */}
       <div className='w-full max-w-md' ref={wrapperRef}>
         {/* Main Modal */}
-        <div className='relative rounded-lg bg-white shadow transition-opacity dark:bg-gray-700'>
+        <div className='relative rounded-lg border-2 border-emerald-500 bg-white shadow dark:bg-dark'>
           <button
             onClick={() => toggleModal()}
             type='button'
             className='absolute top-3 right-2.5 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'
-            data-modal-hide='family-add-modal'
           >
             <RiCloseLine size={30} />
             <span className='sr-only'>Close modal</span>
           </button>
           <div className='flex flex-col px-6 py-6 lg:px-8'>
-            <h3 className='mb-4 text-xl font-medium text-gray-900 dark:text-white'>
+            <h3 className='mb-8 text-xl font-medium text-gray-900 dark:text-white'>
               Create new Family
             </h3>
             {error != '' && (
-              <h4 className='mb-4 text-sm font-semibold text-red-400'>
+              <h4 className='mb-8 text-sm font-semibold text-red-400'>
                 {error}
               </h4>
             )}

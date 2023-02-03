@@ -1,13 +1,17 @@
+import Cookies from 'js-cookie';
 import React from 'react';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FaFemale, FaMale } from 'react-icons/fa';
 import { RiCloseLine } from 'react-icons/ri';
+
+import { TMember } from '@/lib/db/model/Member';
 
 type MemberAddModalProps = {
   toggleModal: (show?: boolean) => void;
   baseApiUrl: string;
   syncMember: (baseApiUrl: string) => void;
   familyId: string;
+  members?: [TMember];
 };
 
 const MEMBER_STATES = {
@@ -21,7 +25,7 @@ const MEMBER_STATES = {
 };
 
 export default function MemberAddModal(props: MemberAddModalProps) {
-  const { toggleModal, baseApiUrl, syncMember } = props;
+  const { toggleModal, baseApiUrl, syncMember, members, familyId } = props;
 
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   useOutsideAlerter(wrapperRef);
@@ -48,35 +52,36 @@ export default function MemberAddModal(props: MemberAddModalProps) {
   async function submitMember() {
     setLoading(true);
 
-    console.log(member);
+    const token = Cookies.get('token') ?? '';
+    const reqHeaders: HeadersInit = new Headers();
+    reqHeaders.set('Content-Type', 'application/json');
+    reqHeaders.set('Authorization', token);
 
-    // const token = Cookies.get('token') ?? '';
-    // const reqHeaders: HeadersInit = new Headers();
-    // reqHeaders.set('Content-Type', 'application/json');
-    // reqHeaders.set('Authorization', token);
+    const res = await fetch(`${baseApiUrl}/family/add_member`, {
+      method: 'POST',
+      headers: reqHeaders,
+      body: JSON.stringify({
+        name: member.name,
+        gender: member.gender,
+        birthDate: member.birthDate,
+        deathDate: member.deathDate,
+        familyId: familyId,
+        parentId: member.parentId,
+        coupleId: member.coupleId,
+      }),
+    });
 
-    // const res = await fetch(`${baseApiUrl}/family/add_member`, {
-    //   method: 'POST',
-    //   headers: reqHeaders,
-    //   body: JSON.stringify({
-    //     name: member.name,
-    //     gender: member.gender,
-    //     birthDate: member.birthDate,
-    //     familyId: member.familyId,
-    //   }),
-    // });
+    const data = await res.json();
 
-    // const data = await res.json();
-
-    // if (data.metadata.status != 201) {
-    //   setLoading(false);
-    //   setError(data.metadata.message);
-    //   return;
-    // } else {
-    //   setLoading(false);
-    //   toggleModal(false);
-    //   syncMember(baseApiUrl);
-    // }
+    if (data.metadata.status != 201) {
+      setLoading(false);
+      setError(data.metadata.message);
+      return;
+    } else {
+      setLoading(false);
+      toggleModal(false);
+      syncMember(baseApiUrl);
+    }
   }
 
   function handleGenderChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -89,7 +94,7 @@ export default function MemberAddModal(props: MemberAddModalProps) {
       id='memberAddModal'
       tabIndex={-1}
       aria-hidden='true'
-      className='modal fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-dark/80 p-4'
+      className='modal fixed inset-0 z-50 hidden h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-dark/80 p-4'
     >
       {/* This is for setting the width */}
       <div className='w-full max-w-md' ref={wrapperRef}>
@@ -126,7 +131,7 @@ export default function MemberAddModal(props: MemberAddModalProps) {
                     type='text'
                     name='member_name'
                     id='member_name'
-                    className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400'
+                    className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
                     placeholder='Name'
                     value={member.name}
                     onChange={(e) =>
@@ -148,7 +153,7 @@ export default function MemberAddModal(props: MemberAddModalProps) {
                         value='M'
                         name='gender'
                         onChange={(e) => handleGenderChange(e)}
-                        className='h-4 w-4 border-gray-300 bg-gray-100 text-emerald-600 focus:ring-2 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-emerald-600'
+                        className='h-4 w-4 border-gray-300 bg-gray-100 text-emerald-600 focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-emerald-600'
                       />
                       <label
                         htmlFor='red-radio'
@@ -164,7 +169,7 @@ export default function MemberAddModal(props: MemberAddModalProps) {
                         value='F'
                         name='gender'
                         onChange={(e) => handleGenderChange(e)}
-                        className='h-4 w-4 border-gray-300 bg-gray-100 text-emerald-600 focus:ring-2 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-emerald-600'
+                        className='h-4 w-4 border-gray-300 bg-gray-100 text-emerald-600 focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-emerald-600'
                       />
                       <label
                         htmlFor='green-radio'
@@ -191,7 +196,7 @@ export default function MemberAddModal(props: MemberAddModalProps) {
                     name='birthDate'
                     id='birthDate'
                     placeholder='Birth Date'
-                    className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400'
+                    className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
                     value={member.birthDate}
                     onChange={(e) =>
                       setMember({ ...member, birthDate: e.target.value })
@@ -210,13 +215,35 @@ export default function MemberAddModal(props: MemberAddModalProps) {
                     name='deathDate'
                     id='deathDate'
                     placeholder='Death Date'
-                    className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400'
+                    className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400'
                     value={member.deathDate}
                     onChange={(e) =>
                       setMember({ ...member, deathDate: e.target.value })
                     }
                   />
                 </div>
+              </div>
+              <div className='flex flex-col'>
+                <label
+                  htmlFor='countries'
+                  className='mb-2 block text-sm font-medium text-gray-900 dark:text-white'
+                >
+                  Parent
+                </label>
+                <select
+                  onChange={(e) =>
+                    setMember({ ...member, parentId: e.target.value })
+                  }
+                  id='parentId'
+                  className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500'
+                >
+                  <option selected>Choose the parent</option>
+                  {members?.map((member) => (
+                    <option key={member._id} value={member._id}>
+                      {member.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Submit BTN */}

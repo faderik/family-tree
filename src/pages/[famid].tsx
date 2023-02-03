@@ -3,8 +3,9 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { AiOutlineLoading3Quarters, AiOutlineNumber } from 'react-icons/ai';
 import { BsArrowLeftCircleFill } from 'react-icons/bs';
+import { FiTrash } from 'react-icons/fi';
 
 import { TFamily } from '@/lib/db/model/Family';
 import { TMember } from '@/lib/db/model/Member';
@@ -103,9 +104,21 @@ export default function FamilyPage(props: FamilyPageProps) {
                     {members.map((member) => (
                       <div
                         key={member._id}
-                        className='flex flex-col items-center gap-2'
+                        className='flex items-center gap-2 rounded-sm bg-emerald-500 px-2 py-1 font-bold text-dark hover:translate-x-1'
                       >
-                        {member.name}
+                        <>{member.name}</>
+
+                        <div className='icon ml-4'>
+                          {family?.oldestId === member._id ? (
+                            <div className='rounded-sm bg-emerald-800 p-1 text-light'>
+                              <AiOutlineNumber />
+                            </div>
+                          ) : (
+                            <button className='rounded-sm bg-emerald-600 p-1 hover:bg-emerald-400'>
+                              <FiTrash className='text-dark' />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -115,6 +128,7 @@ export default function FamilyPage(props: FamilyPageProps) {
                     toggleModal={toggleModal}
                     syncMember={getMembers}
                     familyId={famid as string}
+                    members={members}
                   />
                 </div>
               )}

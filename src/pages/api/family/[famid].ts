@@ -14,7 +14,7 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     if (req.method == 'GET') {
       const family = await Family.findById(famid);
 
-      const members = await Member.find({ familyId: famid });
+      const members = await Member.find({ familyId: famid }).populate('couple');
 
       if (family)
         return new ResponseFormat(res, 200, 'family successfully retrieved', {
@@ -24,6 +24,6 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
       else return new ResponseFormat(res, 404, 'Family not found');
     } else return new ResponseFormat(res, 405, 'Method not allowed');
   } catch (error) {
-    return new ResponseFormat(res, 500, 'GET failed', { error: error });
+    return new ResponseFormat(res, 500, 'GET failed', { error });
   }
 }

@@ -7,7 +7,7 @@ const memberSchema = new Schema(
     birthDate: Date,
     deathDate: Date,
     parentId: Schema.Types.ObjectId,
-    coupleId: Schema.Types.ObjectId,
+    couple: { type: Schema.Types.ObjectId, ref: 'Member' },
     familyId: String,
     createdAt: Date,
   },
@@ -21,7 +21,7 @@ export type TMember = {
   birthDate?: Date;
   deathDate?: Date;
   parentId?: Schema.Types.ObjectId;
-  coupleId?: Schema.Types.ObjectId;
+  couple?: Schema.Types.ObjectId | TMember;
   familyId?: string;
   createdAt?: Date;
 };

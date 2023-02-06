@@ -49,10 +49,10 @@ export default async function add_member(
       doc.gender = gender;
       doc.birthDate = birthDate;
       doc.deathDate = deathDate;
-      doc.parentId = parentId;
-      doc.coupleId = coupleId;
       doc.familyId = familyId;
       doc.createdAt = new Date();
+      if (parentId) doc.parentId = parentId;
+      if (coupleId) doc.couple = coupleId;
 
       if (!checkMemberInFamily) {
         family.oldestId = doc._id;

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
@@ -26,6 +28,7 @@ export default function FamilyPage(props: FamilyPageProps) {
   const { famid } = router.query;
   const [family, setFamily] = React.useState<TFamily>();
   const [members, setMembers] = React.useState<[TMember]>([{}] as [TMember]);
+  const [oldest, setOldest] = React.useState<TMember>({} as TMember);
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
@@ -46,9 +49,73 @@ export default function FamilyPage(props: FamilyPageProps) {
     const data = await res.json();
     setFamily(data.data.family);
     setMembers(data.data.members);
+    setOldest(data.data.oldest);
+
     setLoading(false);
 
+    // proceedData(data.data.oldest, data.data.members);
+
     return;
+  }
+
+  // React.useEffect(() => {
+  //   if (members.length > 0 && oldest) proceedData(oldest, members);
+  // }, [members, oldest]);
+
+  async function proceedData(oldest: TMember, _members: [TMember]) {
+    const format: any = [];
+
+    if (oldest) {
+      format[0] = oldest;
+      const oldestIdx = _members.findIndex(
+        (member) => member._id.valueOf() == oldest._id.valueOf()
+      );
+      _members.splice(oldestIdx, 1);
+
+      while (_members.length > 0) {
+        // console.log('MEMBERS: ', _members);
+
+        _members.map(async (member) => {
+          const sonOfAnOldest =
+            member.parentId?.valueOf() == oldest._id.valueOf();
+
+          if (member.parentId && sonOfAnOldest) {
+            if (!format[1]) format[1] = [member];
+            else format[1].push(member);
+
+            _members.splice(_members.indexOf(member), 1);
+          } else if (member.parentId) {
+            const lastIdx = format.length - 1;
+
+            console.log('INI: ', lastIdx, format[lastIdx].length);
+
+            for (let i = 0; i < format[lastIdx].length; i++) {
+              const parent = format[lastIdx][i];
+              const parentIdx = i;
+
+              console.log('FOR: ', i, format[lastIdx][i].name);
+
+              if (parent._id.valueOf() == member.parentId?.valueOf()) {
+                if (!format[lastIdx + 1]) format[lastIdx + 1] = [[member]];
+                else if (!format[lastIdx + 1][parentIdx])
+                  format[lastIdx + 1][parentIdx] = [member];
+                else format[lastIdx + 1][parentIdx].push(member);
+
+                _members.splice(_members.indexOf(member), 1);
+              } else {
+                continue;
+              }
+            }
+          } else {
+            _members.splice(_members.indexOf(member), 1);
+          }
+        });
+      }
+
+      console.log('FORMAT: ', format);
+    } else {
+      console.log('NO OLDEST');
+    }
   }
 
   function toggleModal(show?: boolean) {
@@ -103,7 +170,7 @@ export default function FamilyPage(props: FamilyPageProps) {
                   <div className='flex flex-col items-center gap-4'>
                     {members.map((member) => (
                       <div
-                        key={member._id}
+                        key={'mem' + member._id}
                         className='flex items-center gap-2 rounded-sm bg-emerald-500 px-2 py-1 font-bold text-dark hover:translate-x-1'
                       >
                         <>{member.name}</>

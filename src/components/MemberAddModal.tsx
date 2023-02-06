@@ -11,7 +11,7 @@ type MemberAddModalProps = {
   baseApiUrl: string;
   syncMember: (baseApiUrl: string) => void;
   familyId: string;
-  members?: [TMember];
+  members: [TMember];
 };
 
 const MEMBER_STATES = {
@@ -76,6 +76,7 @@ export default function MemberAddModal(props: MemberAddModalProps) {
     if (data.metadata.status != 201) {
       setLoading(false);
       setError(data.metadata.message);
+      console.error(data.data.error);
       return;
     } else {
       setLoading(false);
@@ -234,12 +235,13 @@ export default function MemberAddModal(props: MemberAddModalProps) {
                   onChange={(e) =>
                     setMember({ ...member, parentId: e.target.value })
                   }
+                  defaultValue='placeholder'
                   id='parentId'
                   className='block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500'
                 >
-                  <option selected>Choose the parent</option>
-                  {members?.map((member) => (
-                    <option key={member._id} value={member._id}>
+                  <option value='placeholder'>Choose the parent</option>
+                  {members.map((member) => (
+                    <option key={'ddown' + member._id} value={member._id}>
                       {member.name}
                     </option>
                   ))}

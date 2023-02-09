@@ -1,5 +1,7 @@
 import { Model, model, models, Schema } from 'mongoose';
 
+import { TMember } from '@/lib/db/model/Member';
+
 const familySchema = new Schema(
   {
     _id: String,
@@ -14,7 +16,7 @@ export type TFamily = {
   _id: string;
   userId: string;
   name: string;
-  oldestId: Schema.Types.ObjectId;
+  oldestId: Schema.Types.ObjectId | TMember;
 };
 
 export const Family =

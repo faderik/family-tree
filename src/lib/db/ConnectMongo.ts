@@ -1,8 +1,8 @@
-import { connect } from 'mongoose';
+import * as mongoose from 'mongoose';
 
 const connectMongo = async () => {
   return (
-    connect(process.env.MONGODB_URI ?? ''),
+    mongoose.set('strictQuery', false).connect(process.env.MONGODB_URI ?? ''),
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

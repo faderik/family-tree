@@ -36,60 +36,31 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
         );
         members.splice(oldestIdx, 1);
 
-        // First generation & Filter non parent member
-        [...members].map(async (member) => {
-          if (member.parentId) {
-            const parentIsOldest =
-              member.parentId.valueOf() == oldest._id.valueOf();
-
-            if (parentIsOldest) {
-              if (!famTree[1]) famTree.push([member]);
-              else famTree[1].push(member);
-
-              members.splice(members.indexOf(member), 1);
-            }
-          } else {
-            members.splice(members.indexOf(member), 1);
-          }
-        });
-
-        // Separate member based on their parent
-        let famDepth = 1;
+        // Separate member based on their generation
+        let famDepth = 0;
         while (members.length > 0) {
           famDepth++;
 
           for (let i = 0; i < famTree[famDepth - 1].length; i++) {
             const parent = famTree[famDepth - 1][i];
-            const isArray = Array.isArray(parent);
 
-            if (!isArray) {
-              [...members].map(async (member) => {
-                if (member.parentId) {
-                  if (member.parentId.valueOf() == parent._id.valueOf()) {
-                    if (!famTree[famDepth]) famTree[famDepth] = [member];
-                    else {
-                      famTree[famDepth] = [...famTree[famDepth], member];
-                    }
-
-                    members.splice(members.indexOf(member), 1);
+            [...members].map(async (member) => {
+              if (member.parentId) {
+                if (member.parentId.valueOf() == parent._id.valueOf()) {
+                  if (!famTree[famDepth]) famTree[famDepth] = [member];
+                  else {
+                    famTree[famDepth] = [...famTree[famDepth], member];
                   }
-                } else {
+
                   members.splice(members.indexOf(member), 1);
                 }
-              });
-            } else {
-              // console.log('P: ', parent);
-            }
+              } else {
+                members.splice(members.indexOf(member), 1);
+              }
+            });
           }
         }
       }
-
-      // return new ResponseFormat(res, 200, 'DEBUG', {
-      //   family,
-      //   oldest,
-      //   members: backupMembers,
-      //   famTree,
-      // });
 
       if (family)
         return new ResponseFormat(
@@ -99,7 +70,7 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
           {
             family,
             members: backupMembers,
-            famTree,
+            tree: famTree,
             oldest,
           }
         );

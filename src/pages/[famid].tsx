@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
+import Cookies from 'js-cookie';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -71,6 +72,35 @@ export default function FamilyPage(props: FamilyPageProps) {
     document.getElementById('memberAddModal')?.classList.toggle('flex');
   }
 
+  async function deletemember(memberId: string) {
+    setLoading(true);
+
+    const token = Cookies.get('token') ?? '';
+    const reqHeaders: HeadersInit = new Headers();
+    reqHeaders.set('Content-Type', 'application/json');
+    reqHeaders.set('Authorization', token);
+
+    const res = await fetch(`${props.baseApiUrl}/family/delete_member`, {
+      method: 'POST',
+      headers: reqHeaders,
+      body: JSON.stringify({
+        memberId: memberId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.metadata.status != 200) {
+      setLoading(false);
+      console.error(data.metadata.message);
+      return;
+    } else {
+      setLoading(false);
+      toggleModal(false);
+      getMembers(props.baseApiUrl);
+    }
+  }
+
   return (
     <Layout>
       <Seo />
@@ -112,14 +142,21 @@ export default function FamilyPage(props: FamilyPageProps) {
                   </div> */}
 
                   {/* Tree */}
-                  <Tree tree={tree} oldest={oldest} />
+                  <Tree
+                    tree={tree}
+                    oldest={oldest}
+                    deleteMember={deletemember}
+                  />
 
                   <MemberAddModal
                     baseApiUrl={props.baseApiUrl}
                     toggleModal={toggleModal}
                     syncMember={getMembers}
                     familyId={famid as string}
-                    members={members}
+                    members={members.filter(
+                      (member) =>
+                        member.parentId != null || member._id == oldest._id
+                    )}
                   />
                 </div>
               </div>

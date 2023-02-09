@@ -7,10 +7,11 @@ import { TMember } from '@/lib/db/model/Member';
 type MemberBoxProps = {
   member: TMember;
   oldest: boolean;
+  deleteMember: (id: string) => void;
 };
 
 function MemberBox(props: MemberBoxProps) {
-  const { member, oldest } = props;
+  const { member, oldest, deleteMember } = props;
 
   return (
     <div
@@ -25,7 +26,10 @@ function MemberBox(props: MemberBoxProps) {
             <AiOutlineNumber />
           </div>
         ) : (
-          <button className='rounded-sm bg-emerald-600 p-1 hover:bg-emerald-400'>
+          <button
+            className='rounded-sm bg-emerald-600 p-1 hover:bg-emerald-400'
+            onClick={() => deleteMember(member._id)}
+          >
             <FiTrash className='text-dark' />
           </button>
         )}

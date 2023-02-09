@@ -8,6 +8,7 @@ import MemberBox from '@/components/MemberBox';
 type TreeProps = {
   tree: any;
   oldest: TMember;
+  deleteMember: (id: string) => void;
 };
 
 export default function Tree(props: TreeProps) {
@@ -31,6 +32,7 @@ export default function Tree(props: TreeProps) {
               key={'mem' + member._id}
               member={member}
               oldest={oldest._id == member._id}
+              deleteMember={props.deleteMember}
             />
           ))}
         </div>

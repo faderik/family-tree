@@ -11,7 +11,7 @@ type MemberAddModalProps = {
   baseApiUrl: string;
   syncMember: (baseApiUrl: string) => void;
   familyId: string;
-  members: [TMember];
+  members: TMember[];
 };
 
 const MEMBER_STATES = {
@@ -76,7 +76,6 @@ export default function MemberAddModal(props: MemberAddModalProps) {
     if (data.metadata.status != 201) {
       setLoading(false);
       setError(data.metadata.message);
-      console.error(data.data.error);
       return;
     } else {
       setLoading(false);
